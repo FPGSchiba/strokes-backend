@@ -33,6 +33,3 @@ override.tf.json
 terraform.rc
 
 .idea
-.idea/vcs.xml
-.idea/strokes-backend.iml
-.idea/modules.xml
