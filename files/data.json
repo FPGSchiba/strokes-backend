@@ -1,0 +1,17 @@
+{
+  "users": [
+    {
+      "username": "spirou",
+      "group": "admin",
+      "password": "Test123456!"
+    }
+  ],
+  "groups": [
+    {
+      "name": "admin"
+    },
+    {
+      "name": "user"
+    }
+  ]
+}

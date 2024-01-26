@@ -110,31 +110,13 @@ resource "aws_cognito_user_pool_client" "client" {
   name                          = "${var.prefix}-client"
   user_pool_id                  = aws_cognito_user_pool.pool.id
   prevent_user_existence_errors = "ENABLED"
-  access_token_validity         = 2
-  id_token_validity             = 2
-  refresh_token_validity        = 365
   explicit_auth_flows = [
-    "ALLOW_REFRESH_TOKEN_AUTH",
+    "ALLOW_ADMIN_USER_PASSWORD_AUTH",
     "ALLOW_CUSTOM_AUTH",
-    "ALLOW_USER_SRP_AUTH"
+    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_USER_SRP_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH"
   ]
-  allowed_oauth_scopes = [
-    "aws.cognito.signin.user.admin",
-    "email",
-    "openid",
-    "phone",
-    "profile"
-  ]
-  allowed_oauth_flows = ["code"]
-  supported_identity_providers = [
-    "COGNITO"
-  ]
-
-  token_validity_units {
-    access_token  = "hours"
-    id_token      = "hours"
-    refresh_token = "days"
-  }
 }
 
 resource "aws_cognito_identity_pool" "pool" {
@@ -156,4 +138,28 @@ resource "aws_cognito_identity_pool_roles_attachment" "pool" {
     "authenticated"   = "${aws_iam_role.cognito_authenticated.arn}"
     "unauthenticated" = "${aws_iam_role.cognito_unauthenticated.arn}"
   }
+}
+
+resource "aws_cognito_user_group" "this" {
+  for_each = { for f in local.data.groups: f.name => f}
+
+  name         = each.key
+  user_pool_id = aws_cognito_user_pool.pool.id
+}
+
+
+resource "aws_cognito_user" "this" {
+  for_each = { for f in local.data.users : f.username => f }
+
+  user_pool_id = aws_cognito_user_pool.pool.id
+  username     = each.key
+  password     = each.value.password
+}
+
+resource "aws_cognito_user_in_group" "this" {
+  for_each = { for f in local.data.users : f.username => f }
+
+  user_pool_id = aws_cognito_user_pool.pool.id
+  username = each.key
+  group_name = each.value.group
 }
