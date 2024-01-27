@@ -96,6 +96,18 @@ resource "aws_cognito_user_pool" "pool" {
     }
   }
 
+  schema {
+    attribute_data_type = "String"
+    name                = "custom:groups"
+    required            = false
+    mutable             = true
+
+    string_attribute_constraints {
+      min_length = 0
+      max_length = 2048
+    }
+  }
+
   password_policy {
     temporary_password_validity_days = 7
     minimum_length                   = 10
@@ -141,7 +153,7 @@ resource "aws_cognito_identity_pool_roles_attachment" "pool" {
 }
 
 resource "aws_cognito_user_group" "this" {
-  for_each = { for f in local.data.groups: f.name => f}
+  for_each = { for f in local.data.groups : f.name => f }
 
   name         = each.key
   user_pool_id = aws_cognito_user_pool.pool.id
@@ -160,6 +172,10 @@ resource "aws_cognito_user_in_group" "this" {
   for_each = { for f in local.data.users : f.username => f }
 
   user_pool_id = aws_cognito_user_pool.pool.id
-  username = each.key
-  group_name = each.value.group
+  username     = each.key
+  group_name   = each.value.group
+
+  depends_on = [
+    aws_cognito_user.this
+  ]
 }
