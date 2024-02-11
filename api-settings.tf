@@ -47,11 +47,14 @@ resource "aws_iam_role_policy" "cloudwatch" {
 # Authorization
 
 module "lambda_auth" {
-  source = "github.com/FPGSchiba/terraform-aws-lambda.git?ref=v1.0.2"
+  source   = "github.com/FPGSchiba/terraform-aws-lambda.git?ref=v1.0.2"
   code_dir = "${path.module}/files/auth"
-  name = "${var.prefix}-auth"
-  handler = "main.handle"
-  runtime = "python3.11"
+  name     = "${var.prefix}-auth"
+  handler  = "main.handle"
+  runtime  = "python3.11"
+  environment_variables = {
+    VALIDATE_URL = "${aws_api_gateway_deployment.this.invoke_url}/validate"
+  }
 }
 
 resource "aws_lambda_permission" "auth" {

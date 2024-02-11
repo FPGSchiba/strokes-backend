@@ -12,13 +12,13 @@ resource "aws_api_gateway_authorizer" "this" {
 module "ms_stroke" {
   source             = "github.com/FPGSchiba/terraform-aws-microservice.git?ref=v1.0.1"
   api_name           = aws_api_gateway_rest_api.this.name
-  code_dir           = "${path.module}/files/strokes"
+  code_dir           = "${path.module}/files/strokes/"
   cors_enabled       = true
   http_methods       = ["GET", "POST", "DELETE"]
   path_name          = "stroke"
   prefix             = var.prefix
-  #authorization_type = "COGNITO_USER_POOLS"
-  #authorizer_id      = aws_api_gateway_authorizer.this.id
+  authorization_type = "COGNITO_USER_POOLS"
+  authorizer_id      = aws_api_gateway_authorizer.this.id
   runtime            = "python3.11"
   handler            = "main.handle"
 
@@ -30,13 +30,31 @@ module "ms_stroke" {
 module "ms_groups" {
   source             = "github.com/FPGSchiba/terraform-aws-microservice.git?ref=v1.0.1"
   api_name           = aws_api_gateway_rest_api.this.name
-  code_dir           = "${path.module}/files/groups"
+  code_dir           = "${path.module}/files/groups/"
   cors_enabled       = true
   http_methods       = ["GET"]
   path_name          = "groups"
   prefix             = var.prefix
   authorization_type = "COGNITO_USER_POOLS"
   authorizer_id      = aws_api_gateway_authorizer.this.id
+  runtime            = "python3.11"
+  handler            = "main.handle"
+
+  depends_on = [
+    aws_api_gateway_rest_api.this
+  ]
+}
+
+module "ms_validate" {
+  source             = "github.com/FPGSchiba/terraform-aws-microservice.git?ref=v1.0.1"
+  api_name           = aws_api_gateway_rest_api.this.name
+  code_dir           = "${path.module}/files/validate/"
+  cors_enabled       = false
+  http_methods       = ["GET"]
+  path_name          = "validate"
+  authorization_type = "COGNITO_USER_POOLS"
+  authorizer_id      = aws_api_gateway_authorizer.this.id
+  prefix             = var.prefix
   runtime            = "python3.11"
   handler            = "main.handle"
 
@@ -54,7 +72,7 @@ resource "aws_api_gateway_resource" "group" {
 module "ms_members" {
   source             = "github.com/FPGSchiba/terraform-aws-microservice.git?ref=v1.0.1"
   api_name           = aws_api_gateway_rest_api.this.name
-  code_dir           = "${path.module}/files/members"
+  code_dir           = "${path.module}/files/members/"
   cors_enabled       = true
   http_methods       = ["DELETE", "POST"]
   path_name          = "{group-id}"

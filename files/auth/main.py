@@ -1,29 +1,34 @@
 import json
+import os
+import urllib.request
+from urllib.error import HTTPError
 
 
-def lambda_handler(event, context):
-    token = event['authorizationToken']
-    if token == 'allow':
-        print('authorized')
-        response = generatePolicy('user', 'Allow', event['methodArn'])
-    elif token == 'deny':
-        print('unauthorized')
-        response = generatePolicy('user', 'Deny', event['methodArn'])
-    elif token == 'unauthorized':
-        print('unauthorized')
-        raise Exception('Unauthorized')  # Return a 401 Unauthorized response
-        return 'unauthorized'
+VALIDATE_URL = os.getenv('VALIDATE_URL')
+
+
+def handle(event, context):
+    print('Auth')
+    print(f'Event: {event}')
+    token = event['queryStringParameters']['auth']
+    print(f'Token: {token}')
     try:
-        return json.loads(response)
-    except:
-        print('unauthorized')
-        return 'unauthorized'  # Return a 500 response
+        req = urllib.request.Request(VALIDATE_URL)
+        req.add_header('Authorization', token)
+        status = urllib.request.urlopen(req).status
+        response = generatePolicy('user', 'Allow', event['methodArn'])
+        print(status)
+    except HTTPError as error:
+        print('Error')
+        print(error.code)
+        response = generatePolicy('user', 'Deny', event['methodArn'])
+    return json.loads(response)
 
 
 def generatePolicy(principalId, effect, resource):
     authResponse = {}
     authResponse['principalId'] = principalId
-    if (effect and resource):
+    if effect and resource:
         policyDocument = {}
         policyDocument['Version'] = '2012-10-17'
         policyDocument['Statement'] = [];

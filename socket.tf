@@ -33,11 +33,11 @@ resource "aws_apigatewayv2_integration" "connect" {
 }
 
 resource "aws_apigatewayv2_route" "connect" {
-  api_id    = aws_apigatewayv2_api.this.id
-  route_key = "$connect"
-  target    = "integrations/${aws_apigatewayv2_integration.connect.id}"
+  api_id             = aws_apigatewayv2_api.this.id
+  route_key          = "$connect"
+  target             = "integrations/${aws_apigatewayv2_integration.connect.id}"
   authorization_type = "CUSTOM"
-  authorizer_id = aws_apigatewayv2_authorizer.auth.id
+  authorizer_id      = aws_apigatewayv2_authorizer.auth.id
 }
 
 resource "aws_apigatewayv2_route_response" "connect" {
@@ -141,16 +141,16 @@ resource "aws_lambda_permission" "disconnect" {
 }
 
 resource "aws_apigatewayv2_stage" "example" {
-  api_id = aws_apigatewayv2_api.this.id
-  name   = "dev"
+  api_id      = aws_apigatewayv2_api.this.id
+  name        = "dev"
   auto_deploy = true
 
   default_route_settings {
-    logging_level = "INFO"
-    data_trace_enabled = true
+    logging_level            = "INFO"
+    data_trace_enabled       = true
     detailed_metrics_enabled = true
-    throttling_burst_limit = 10000
-    throttling_rate_limit = 10000
+    throttling_burst_limit   = 10000
+    throttling_rate_limit    = 10000
   }
 
   depends_on = [
